@@ -9,6 +9,7 @@ import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { AuthCredentialsValidator,  TAuthCredentialsValidator} from "@/lib/validators/account-credentials-validator";
+import { trpc } from "@/trpc/client";
 
 const page = () => {
 
@@ -20,6 +21,9 @@ const page = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<TAuthCredentialsValidator>({
     resolver: zodResolver(AuthCredentialsValidator),
   });
+
+  const {data} = trpc.exampleApiRoute.useQuery()
+  console.log(data)
 
 
   // the data passed here sould match the schema, i.e, typesafe
