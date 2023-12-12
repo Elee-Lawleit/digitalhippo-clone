@@ -13,23 +13,16 @@ import { trpc } from "@/trpc/client";
 
 const page = () => {
 
-
-
-  
-
   //<TAuthCredebtialsValidator> -> passing the type of schema that we infered from zod, so the register function is fully typesafe
   const { register, handleSubmit, formState: { errors } } = useForm<TAuthCredentialsValidator>({
     resolver: zodResolver(AuthCredentialsValidator),
   });
 
-  const {data} = trpc.exampleApiRoute.useQuery()
-  console.log(data)
-
+  const {mutate, isLoading} = trpc.auth.craetePayloadUser.useMutation({});
 
   // the data passed here sould match the schema, i.e, typesafe
   const onSubmit = ({email, password}: TAuthCredentialsValidator)=>{
-    //send data to server
-    console.log(email, password)
+    mutate({email, password})
   }
 
   return (
@@ -69,6 +62,7 @@ const page = () => {
                   <Label htmlFor="password">Password</Label>
                   <Input
                     {...register("password")}
+                    type="password"
                     className={cn({
                       "ring-red-500": errors.password
                     })}
