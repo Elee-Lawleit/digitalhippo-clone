@@ -4,12 +4,15 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Loader2, SendToBack } from "lucide-react"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { AuthCredentialsValidator,  TAuthCredentialsValidator} from "@/lib/validators/account-credentials-validator";
 import { trpc } from "@/trpc/client";
+import {toast} from "sonner"
+import { ZodError } from "zod";
+import { useRouter } from "next/navigation";
 
 const page = () => {
 
@@ -18,7 +21,27 @@ const page = () => {
     resolver: zodResolver(AuthCredentialsValidator),
   });
 
-  const {mutate, isLoading} = trpc.auth.craetePayloadUser.useMutation({});
+  const router = useRouter();
+
+  const {mutate, isLoading} = trpc.auth.craetePayloadUser.useMutation({
+    onError: (error)=>{
+      if(error.data?.code === "CONFLICT"){
+        toast.error("This email is already in use. Sign in instead?")
+        return
+      }
+
+      if(error instanceof ZodError){
+        toast.error(error.issues[0].message)
+        return
+      }
+      toast.error("Something went wrong. Please try again.")
+    },
+
+    onSuccess: ({sentToEmail})=>{
+      toast.success(`Verification email sent to ${sentToEmail}.`)
+      router.push(`/verify-email?to=${sentToEmail}`)
+    }
+  });
 
   // the data passed here sould match the schema, i.e, typesafe
   const onSubmit = ({email, password}: TAuthCredentialsValidator)=>{
@@ -31,15 +54,14 @@ const page = () => {
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="flex flex-col items-center space-y-2 text-center">
             <Icons.logo className="h-20 w-20" />
-            <h1 className="text-2xl font-bold">
-              Create Account
-            </h1>
+            <h1 className="text-2xl font-bold">Create Account</h1>
 
             <Link
               className={buttonVariants({
-                variant: 'link',
+                variant: "link",
               })}
-              href='/sign-in'>
+              href="/sign-in"
+            >
               Already have an account? Sign-in
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -53,10 +75,15 @@ const page = () => {
                   <Input
                     {...register("email")}
                     className={cn({
-                      "outline-red-500": errors.email
+                      "outline-red-500": errors.email,
                     })}
                     placeholder="you@example.com"
                   />
+                  {errors?.email && (
+                    <p className="text-sm text-red-500">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
                 <div className="grid gap-1 py-2">
                   <Label htmlFor="password">Password</Label>
@@ -64,20 +91,27 @@ const page = () => {
                     {...register("password")}
                     type="password"
                     className={cn({
-                      "ring-red-500": errors.password
+                      "ring-red-500": errors.password,
                     })}
                     placeholder="Password"
                   />
+                  {errors?.password && (
+                    <p className="text-sm text-red-500">
+                      {errors.password.message}
+                    </p>
+                  )}
                 </div>
 
-                <Button>Sign up</Button>
+                <Button disabled={isLoading}>
+                  {isLoading ? <Loader2 className="animate-spin" /> : "Sign up"}
+                </Button>
               </div>
             </form>
           </div>
         </div>
       </div>
     </>
-  )
+  );
 }
 
 export default page
