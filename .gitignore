@@ -35,3 +35,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+# server media files, you know these should really be hosted on aws or firebase, ANYWAY.........
+media
+product_files
