@@ -1,5 +1,14 @@
-import { PRODUCT_CATEGORIES } from "../../config";
-import { CollectionConfig } from "payload/types";
+import { BeforeChangeHook } from "payload/dist/collections/config/types"
+import { PRODUCT_CATEGORIES } from "../../config"
+import { CollectionConfig } from "payload/types"
+import { Product } from "../../payload-types"
+import { stripe } from "../../lib/stripe"
+
+const addUser: BeforeChangeHook<Product> = async ({ req, data }) => {
+  const user = req.user
+
+  return { ...data, user: user }
+}
 
 export const Products: CollectionConfig = {
   slug: "products",
@@ -7,6 +16,51 @@ export const Products: CollectionConfig = {
     useAsTitle: "name",
   },
   access: {},
+  hooks: {
+    beforeChange: [
+      addUser,
+      async (args) => {
+        if (args.operation === "create") {
+          const data = args.data as Product
+
+          const createdProduct = await stripe.products.create({
+            name: data.name,
+            default_price_data: {
+              currency: "USD",
+              unit_amount: Math.round(data.price * 100),
+            },
+          })
+          const updatedProduct: Product = {
+            ...data,
+            stripeId: createdProduct.id,
+
+            //this is the product api id thing we define in stripe dashboard
+            priceId: createdProduct.default_price as string,
+          }
+          return updatedProduct
+        }
+        //because we only want to generate a stripe id (registering the product with stripe) when the product is created
+        else if (args.operation === "update") {
+          const data = args.data as Product
+
+          //the two things we need to handle for stripe, payload will update the rest
+          const update = await stripe.products.update(data.stripeId!, {
+            name: data.name,
+            default_price: data.priceId!
+          })
+
+          const updatedProduct: Product = {
+            ...data,
+            stripeId: update.id,
+
+            //this is the product api id thing we define in stripe dashboard
+            priceId: update.default_price as string,
+          }
+          return updatedProduct
+        }
+      },
+    ],
+  },
   fields: [
     {
       name: "user",
@@ -123,4 +177,4 @@ export const Products: CollectionConfig = {
       ],
     },
   ],
-};
+}
