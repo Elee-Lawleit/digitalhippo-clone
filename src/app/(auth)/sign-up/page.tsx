@@ -14,7 +14,7 @@ import {toast} from "sonner"
 import { ZodError } from "zod";
 import { useRouter } from "next/navigation";
 
-const page = () => {
+const Page = () => {
 
   //<TAuthCredebtialsValidator> -> passing the type of schema that we infered from zod, so the register function is fully typesafe
   const { register, handleSubmit, formState: { errors } } = useForm<TAuthCredentialsValidator>({
@@ -114,4 +114,4 @@ const page = () => {
   );
 }
 
-export default page
+export default Page

@@ -16,7 +16,7 @@ import { trpc } from "@/trpc/client";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 
-const page = () => {
+const Page = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const isSeller = searchParams.get("as") === "seller";
@@ -166,4 +166,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
