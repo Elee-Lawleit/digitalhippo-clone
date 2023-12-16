@@ -1,18 +1,18 @@
-import { Icons } from "./Icons";
-import MaxWidthWrapper from "./MaxWidthWrapper";
-import NavItems from "./NavItems";
-import Link from "next/link";
-import { buttonVariants } from "./ui/button";
-import { Divide } from "lucide-react";
-import Cart from "./Cart";
-import { getServerSideUser } from "@/lib/payload-utils";
-import { cookies } from "next/headers";
-import UserAccountNav from "./UserAccountNav";
+import { Icons } from "./Icons"
+import MaxWidthWrapper from "./MaxWidthWrapper"
+import NavItems from "./NavItems"
+import Link from "next/link"
+import { buttonVariants } from "./ui/button"
+import Cart from "./Cart"
+import { getServerSideUser } from "@/lib/payload-utils"
+import { cookies } from "next/headers"
+import UserAccountNav from "./UserAccountNav"
+import MobileNav from "./MobileNav"
 
 const Navbar = async () => {
   //nothing to complex, just taking the cookie value and passing it to the custom function that checks if the user is loggedin, the same as taking value from localStorage essentially
-  const nextCookies = cookies();
-  const { user } = await getServerSideUser(nextCookies);
+  const nextCookies = cookies()
+  const { user } = await getServerSideUser(nextCookies)
 
   return (
     <div className="bg-white sticky z-50 top-0 inset-x-0 h-16">
@@ -20,9 +20,8 @@ const Navbar = async () => {
         <MaxWidthWrapper>
           <div className="border-b border-gray-200">
             <div className="flex h-16 items-center">
-              {/* mobile nav */}
+              <MobileNav />
 
-              {/* left part of navbar */}
               <div className="ml-4 flex lg:ml-0">
                 <Link href="/">
                   <Icons.logo className="h-10 w-10" />
@@ -33,7 +32,6 @@ const Navbar = async () => {
                 <NavItems />
               </div>
 
-              {/* right part of navbar */}
               <div className="ml-auto flex items-center">
                 <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
                   {user ? null : (
@@ -52,13 +50,13 @@ const Navbar = async () => {
                   )}
 
                   {user ? (
-                    <p>
-                      <UserAccountNav user={user} />
-                    </p>
+                    <UserAccountNav user={user} />
                   ) : (
                     <Link
                       href="/sign-up"
-                      className={buttonVariants({ variant: "ghost" })}
+                      className={buttonVariants({
+                        variant: "ghost",
+                      })}
                     >
                       Create account
                     </Link>
@@ -87,7 +85,7 @@ const Navbar = async () => {
         </MaxWidthWrapper>
       </header>
     </div>
-  );
-};
+  )
+}
 
-export default Navbar;
+export default Navbar

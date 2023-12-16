@@ -10,7 +10,8 @@ import { stripeWebHookHandler } from "./webhooks"
 import nextBuild from "next/dist/build"
 import path from "path"
 import { PayloadRequest } from "payload/types"
-import {parse} from "url"
+import { parse } from "url"
+import { Payload } from "payload"
 
 const app = express()
 
@@ -42,23 +43,22 @@ const start = async () => {
 
   app.post("/api/webhooks/stripe", webhookMiddleware, stripeWebHookHandler)
 
-
-    const payload = await getPayloadClient({
-      initOptions: {
-        express: app,
-        onInit: async (cms) => {
-          cms.logger.info(`Admin URL ${cms.getAdminURL()}`)
-        },
+  const payload = await getPayloadClient({
+    initOptions: {
+      express: app,
+      onInit: async (cms) => {
+        cms.logger.info(`Admin URL ${cms.getAdminURL()}`)
       },
-    })
-
+    },
+  })
+  
   const cartRouter = express.Router()
 
   cartRouter.use(payload.authenticate)
-  
-  cartRouter.get("/", (req, res)=>{
+
+  cartRouter.get("/", (req, res) => {
     const request = req as PayloadRequest
-    if(!request.user) return res.redirect("/sign-in?origin=cart")
+    if (!request.user) return res.redirect("/sign-in?origin=cart")
 
     const parsedUrl = parse(req.url, true)
     return nextApp.render(req, res, "/cart", parsedUrl.query)
@@ -66,8 +66,8 @@ const start = async () => {
 
   app.use("/cart", cartRouter)
 
-  if(process.env.NEXT_BUILD){
-    app.listen(PORT, async()=>{
+  if (process.env.NEXT_BUILD) {
+    app.listen(PORT, async () => {
       payload.logger.info("Next.js is building for production")
       // @ts-expect-error
       await nextBuild(path.join(__dirname, "../"))

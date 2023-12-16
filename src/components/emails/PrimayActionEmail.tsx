@@ -11,6 +11,7 @@ import {
   Text,
   render,
 } from "@react-email/components"
+import * as React from "react"
 
 interface EmailTemplateProps {
   actionLabel: string
@@ -61,9 +62,9 @@ export const EmailTemplate = ({
   )
 }
 
-export const PrimaryActionEmailHtml = (props: EmailTemplateProps)=>{
+export const PrimaryActionEmailHtml = (props: EmailTemplateProps) => {
   return render(<EmailTemplate {...props} />, {
-    pretty: true
+    pretty: true,
   })
 }
 
